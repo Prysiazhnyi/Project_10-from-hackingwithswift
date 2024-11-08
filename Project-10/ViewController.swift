@@ -85,9 +85,21 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
             vc.selectPath = getDocumentsDirectory().appendingPathComponent(person.image)
             vc.people = people  // Передаем массив people
             vc.indexPath = indexPath  // Передаем выбранный indexPath
+            vc.delegate = self  // Устанавливаем делегата для обновлений
             print(person.name)
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    @objc func deletePerson(at indexPath: IndexPath) {
+        // Удаляем элемент из массива
+        people.remove(at: indexPath.item)
+        collectionView.deleteItems(at: [indexPath])
+    }
 }
 
+extension ViewController: DetailViewControllerDelegate {
+    func didDeletePerson(at indexPath: IndexPath) {
+        deletePerson(at: indexPath)
+    }
+}
