@@ -49,6 +49,39 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     
     @objc func addNewPerson() {
         let picker = UIImagePickerController()
+        
+        // Проверяем, доступна ли камера на устройстве
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            // Показываем выбор между камерой и галереей
+            let alertController = UIAlertController(title: "Выберите источник", message: nil, preferredStyle: .actionSheet)
+            
+            // Камера
+            alertController.addAction(UIAlertAction(title: "Камера", style: .default, handler: { _ in
+                self.presentImagePicker(with: .camera)
+            }))
+            
+            // Фотогалерея
+            alertController.addAction(UIAlertAction(title: "Фотогалерея", style: .default, handler: { _ in
+                self.presentImagePicker(with: .photoLibrary)
+            }))
+            
+            // Отмена
+            alertController.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+            
+            // Отображаем диалоговое окно
+            present(alertController, animated: true)
+        } else {
+            picker.sourceType = .photoLibrary // Если камера недоступна, используем фотогалерею
+        }
+        
+        picker.allowsEditing = true
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    func presentImagePicker(with sourceType: UIImagePickerController.SourceType) {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
         picker.allowsEditing = true
         picker.delegate = self
         present(picker, animated: true)
