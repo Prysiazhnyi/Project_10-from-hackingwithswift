@@ -16,6 +16,8 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     var attemptEnterPassword = 0
     var countWordPassword = 4
     
+    var isUnlocked = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -32,10 +34,23 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return people.count
+        return isUnlocked ? people.count : 0
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        guard isUnlocked else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BlockedCell", for: indexPath)
+            cell.contentView.subviews.forEach { $0.removeFromSuperview() } // Видаляємо всі елементи
+            let label = UILabel(frame: cell.bounds)
+            label.text = "Дані заблоковані"
+            label.textAlignment = .center
+            label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+            label.textColor = .gray
+            cell.contentView.addSubview(label)
+            return cell
+        }
+        
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Person", for: indexPath) as? PersonCell else {
             fatalError("Unable to dequeue PersonCell.")
         }
@@ -182,13 +197,13 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         // Обновляем данные в Keychain
         savePeopleToKeychain()
     }
-
+    
     func loadPeopleFromKeychain() {
         if let data = KeychainWrapper.standard.data(forKey: "SecretMessage") {
             do {
                 let decoder = JSONDecoder()
                 people = try decoder.decode([Person].self, from: data) // Восстанавливаем массив людей
-                
+                isUnlocked = true // Устанавливаем флаг разблокировки
                 collectionView.reloadData()
                 navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(block))
                 print("load \(data)")
@@ -302,8 +317,8 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     @objc func block() {
         
         savePeopleToKeychain()
-            //secret.isHidden = true
-            print("tape BLOCK - (secret.isHidden)")
+        isUnlocked = false
+        collectionView.reloadData()
         // Скрываем кнопку
         navigationItem.rightBarButtonItem = nil
     }
