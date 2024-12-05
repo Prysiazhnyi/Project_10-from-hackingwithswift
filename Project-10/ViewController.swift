@@ -15,7 +15,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         super.viewDidLoad()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target:self, action: #selector(addNewPerson))
-        
+        loadPeopleFromKeychain()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -87,23 +87,6 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         present(picker, animated: true)
     }
     
-//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//        guard let image = info[.editedImage] as? UIImage else { return }
-//        
-//        let imageName = UUID().uuidString
-//        let imagePath = getDocumentsDirectory().appendingPathComponent(imageName)
-//        
-//        if let jpegData = image.jpegData(compressionQuality: 0.8) {
-//            try? jpegData.write(to: imagePath)
-//        }
-//        
-//        let person = Person(name: "Unknown", image: imageName)
-//        people.append(person)
-//        collectionView.reloadData()
-//        
-//        dismiss(animated: true)
-//    }
-    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let image = info[.editedImage] as? UIImage else { return }
         
@@ -126,8 +109,10 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         
         // Открываем диалог для переименования
         newName(for: person)
+        
+        savePeopleToKeychain()  // сохраняем
     }
-
+    
     func newName(for person: Person) {
         let ac = UIAlertController(title: "Enter name person", message: nil, preferredStyle: .alert)
         ac.addTextField { textField in
@@ -142,11 +127,11 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
             // Обновляем имя пользователя
             person.name = newName
             self?.collectionView.reloadData() // Перезагружаем коллекцию для отображения нового имени
+            self?.savePeopleToKeychain()
         })
         
         present(ac, animated: true)
     }
-
     
     func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -172,11 +157,38 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         // Удаляем элемент из массива
         people.remove(at: indexPath.item)
         collectionView.deleteItems(at: [indexPath])
+        savePeopleToKeychain()
+    }
+    
+    func loadPeopleFromKeychain() {
+        if let data = KeychainWrapper.standard.data(forKey: "SecretMessage") {
+            do {
+                let decoder = JSONDecoder()
+                people = try decoder.decode([Person].self, from: data) // Восстанавливаем массив людей
+                collectionView.reloadData()
+                print("load \(data)")
+            } catch {
+                print("Failed to decode people: \(error)")
+            }
+        }
+    }
+    
+    func savePeopleToKeychain() {
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(people) // Преобразуем массив людей в Data
+            KeychainWrapper.standard.set(data, forKey: "SecretMessage") // Сохраняем в Keychain
+            //title = "Nothing to see here"
+            print("save \(data)")
+        } catch {
+            print("Failed to encode people: \(error)")
+        }
     }
 }
 
 extension ViewController: DetailViewControllerDelegate {
     func didDeletePerson(at indexPath: IndexPath) {
         deletePerson(at: indexPath)
+        savePeopleToKeychain()
     }
 }

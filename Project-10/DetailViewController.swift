@@ -9,6 +9,7 @@ import UIKit
 
 protocol DetailViewControllerDelegate: AnyObject {
     func didDeletePerson(at indexPath: IndexPath)
+    func savePeopleToKeychain()
 }
 
 class DetailViewController: UIViewController {
@@ -68,6 +69,7 @@ class DetailViewController: UIViewController {
                 person.name = newName
                 self?.people[indexPath.item] = person
                 self?.updateTitle() // Обновляем заголовок или другой интерфейс
+                self?.delegate?.savePeopleToKeychain()
                 print("This new name \(newName)")
             })
             self?.present(ac, animated: true)
@@ -91,5 +93,4 @@ class DetailViewController: UIViewController {
         // Показываем Action Sheet
         present(actionSheet, animated: true)
     }
-    
 }
