@@ -32,7 +32,7 @@ class DetailViewController: UIViewController {
         guard let indexPath = indexPath else { return }
         let person = people[indexPath.item]
         
-        title = "This is \(person.name)"
+        title = "\(person.name)"
         navigationItem.largeTitleDisplayMode = .never
         if let path = selectPath {
             imageView.image = UIImage(contentsOfFile: path.path)

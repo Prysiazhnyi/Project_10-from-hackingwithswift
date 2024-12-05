@@ -87,22 +87,66 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         present(picker, animated: true)
     }
     
+//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+//        guard let image = info[.editedImage] as? UIImage else { return }
+//        
+//        let imageName = UUID().uuidString
+//        let imagePath = getDocumentsDirectory().appendingPathComponent(imageName)
+//        
+//        if let jpegData = image.jpegData(compressionQuality: 0.8) {
+//            try? jpegData.write(to: imagePath)
+//        }
+//        
+//        let person = Person(name: "Unknown", image: imageName)
+//        people.append(person)
+//        collectionView.reloadData()
+//        
+//        dismiss(animated: true)
+//    }
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let image = info[.editedImage] as? UIImage else { return }
         
+        // Генерация уникального имени для фото
         let imageName = UUID().uuidString
         let imagePath = getDocumentsDirectory().appendingPathComponent(imageName)
         
+        // Сохранение изображения в файловую систему
         if let jpegData = image.jpegData(compressionQuality: 0.8) {
             try? jpegData.write(to: imagePath)
         }
         
+        // Создание нового объекта Person
         let person = Person(name: "Unknown", image: imageName)
         people.append(person)
         collectionView.reloadData()
         
+        // Закрытие пикера
         dismiss(animated: true)
+        
+        // Открываем диалог для переименования
+        newName(for: person)
     }
+
+    func newName(for person: Person) {
+        let ac = UIAlertController(title: "Enter name person", message: nil, preferredStyle: .alert)
+        ac.addTextField { textField in
+            textField.text = person.name // Изначально показываем "Unknown"
+        }
+        
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            guard let newName = ac.textFields?[0].text, !newName.isEmpty else { return }
+            
+            // Обновляем имя пользователя
+            person.name = newName
+            self?.collectionView.reloadData() // Перезагружаем коллекцию для отображения нового имени
+        })
+        
+        present(ac, animated: true)
+    }
+
     
     func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
