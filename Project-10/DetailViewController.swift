@@ -54,16 +54,16 @@ class DetailViewController: UIViewController {
         let person = people[indexPath.item]
         
         // Создаем UIAlertController для выбора действия (редактировать или удалить)
-        let actionSheet = UIAlertController(title: "Choose an action", message: nil, preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(title: "Виберіть дію", message: nil, preferredStyle: .actionSheet)
         
         // Добавляем кнопку для редактирования
-        actionSheet.addAction(UIAlertAction(title: "Edit", style: .default) { [weak self] _ in
+        actionSheet.addAction(UIAlertAction(title: "Редагувати", style: .default) { [weak self] _ in
             // Если выбрано редактирование, показываем диалог для ввода нового имени
-            let ac = UIAlertController(title: "Rename person", message: nil, preferredStyle: .alert)
+            let ac = UIAlertController(title: "Перейменувати особу", message: nil, preferredStyle: .alert)
             ac.addTextField { textField in
                 textField.text = person.name // Примерно инициализируем текстом текущего имени
             }
-            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            ac.addAction(UIAlertAction(title: "Скасувати", style: .cancel))
             ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
                 guard let newName = ac?.textFields?[0].text, !newName.isEmpty else { return }
                 person.name = newName
@@ -76,7 +76,7 @@ class DetailViewController: UIViewController {
         })
         
         // Добавляем кнопку для удаления
-        actionSheet.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+        actionSheet.addAction(UIAlertAction(title: "Видалити", style: .destructive) { [weak self] _ in
             // Если выбрано удаление, удаляем запись из массива
             if let indexPath = self?.indexPath {
                 self?.delegate?.didDeletePerson(at: indexPath)
@@ -88,7 +88,7 @@ class DetailViewController: UIViewController {
         })
         
         // Добавляем кнопку для отмены
-        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        actionSheet.addAction(UIAlertAction(title: "Скасувати", style: .cancel))
         
         // Показываем Action Sheet
         present(actionSheet, animated: true)
