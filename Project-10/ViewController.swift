@@ -23,9 +23,14 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         
         authenticateClient()
         
-        navigationItem.rightBarButtonItem = nil // Кнопка скрыта по умолчанию
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target:self, action: #selector(addNewPerson))
-        //loadPeopleFromKeychain()
+        if isUnlocked == false {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(authenticateClient))
+        } else {
+            navigationItem.rightBarButtonItem = nil // Кнопка скрыта по умолчанию
+        }
+        
+        navigationItem.leftBarButtonItem = nil
+        clearKeychainIfFirstLaunch()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -225,7 +230,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         }
     }
     
-    func authenticateClient() {
+   @objc func authenticateClient() {
         let context = LAContext()
         var error: NSError?
         
@@ -238,6 +243,9 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
                 DispatchQueue.main.async {
                     if success {
                         self?.loadPeopleFromKeychain()
+                        self?.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target:self, action: #selector(self?.addNewPerson))
+                        self?.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self?.block))
+                        self?.isUnlocked = true
                     } else {
                         // error
                         let ac = UIAlertController(title: "Помилка автентифікації", message: "Вас не вдалося перевірити; спробуйте ще раз.", preferredStyle: .alert)
@@ -300,6 +308,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
             self.present(alertController, animated: true, completion: nil)
         } else {
             attemptEnterPassword = 0
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(authenticateClient))
         }
     }
     
@@ -320,7 +329,20 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         isUnlocked = false
         collectionView.reloadData()
         // Скрываем кнопку
-        navigationItem.rightBarButtonItem = nil
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(authenticateClient))
+        navigationItem.leftBarButtonItem = nil
+    }
+    
+    func clearKeychainIfFirstLaunch() {
+        let isFirstLaunchKey = "isFirstLaunch"
+        
+        if !UserDefaults.standard.bool(forKey: isFirstLaunchKey) {
+            // Первый запуск после установки
+            KeychainWrapper.standard.removeAllKeys() // Удаляем все данные из Keychain
+            UserDefaults.standard.set(true, forKey: isFirstLaunchKey) // Сохраняем состояние
+            UserDefaults.standard.synchronize()
+            print("Keychain очищен при первом запуске.")
+        }
     }
 }
 
