@@ -148,6 +148,7 @@
 				DEVELOPMENT_TEAM = S9UP438A73;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Project-10/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Dossier;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -177,6 +178,7 @@
 				DEVELOPMENT_TEAM = S9UP438A73;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Project-10/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Dossier;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
